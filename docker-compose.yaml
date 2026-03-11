@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+
+  ros2_gazebo:
+    container_name: ros2_gazebo
+    build:
+      context: .
+      dockerfile: docker/gazebo_ros.Dockerfile
+
+    environment:
+      - DISPLAY=:0
+      - WAYLAND_DISPLAY=wayland-0
+      - XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir
+      - PULSE_SERVER=/mnt/wslg/PulseServer
+      - LD_LIBRARY_PATH=/usr/lib/wsl/lib
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA
+
+    volumes:
+      - ./ros2_ws:/ros2_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /mnt/wslg:/mnt/wslg
+      - /usr/lib/wsl:/usr/lib/wsl
+
+    devices:
+      - /dev/dxg
+
+    runtime: nvidia
+    privileged: true
+    network_mode: host
+    ipc: host
+    stdin_open: true
+    tty: true
+    command: bash
+
+  betaflight_sitl:
+    container_name: betaflight_sitl
+    build:
+      context: .
+      dockerfile: docker/beta_sitl.Dockerfile
+
+    network_mode: host
+    stdin_open: true
+    tty: true
+    command: ./obj/main/betaflight_SITL.elf
