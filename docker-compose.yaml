@@ -33,7 +33,7 @@ services:
     ipc: host
     stdin_open: true
     tty: true
-    command: bash
+    command: gazebo
 
   betaflight_sitl:
     container_name: betaflight_sitl
