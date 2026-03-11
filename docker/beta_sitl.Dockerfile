@@ -14,7 +14,6 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     ca-certificates \
-    build-essential \
     python-is-python3 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -27,4 +26,7 @@ RUN make configs
 
 RUN make TARGET=SITL
 
-CMD ["./obj/main/betaflight_SITL.elf"]
+# Add a script to run SITL with initial configuration
+COPY betaflight_ws/init.cli /betaflight/init.cli
+
+CMD ["/bin/bash", "-c", "./obj/main/betaflight_SITL.elf < /betaflight/init.cli"]

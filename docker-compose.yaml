@@ -2,24 +2,25 @@ version: "3.9"
 
 services:
 
-  ros2_gazebo:
-    container_name: ros2_gazebo
+  gazebo:
+    container_name: gazebo
     build:
       context: .
-      dockerfile: docker/gazebo_ros.Dockerfile
+      dockerfile: docker/gazebo.Dockerfile
 
     environment:
-      - DISPLAY=:0
-      - WAYLAND_DISPLAY=wayland-0
-      - XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir
-      - PULSE_SERVER=/mnt/wslg/PulseServer
+      - DISPLAY=${DISPLAY}
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+      - PULSE_SERVER=${PULSE_SERVER}
       - LD_LIBRARY_PATH=/usr/lib/wsl/lib
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
-      - MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA
+      - GAZEBO_MODEL_PATH=/gazebo_ws/models:/plugins/ardupilot_gazebo/models
+      - GAZEBO_RESOURCE_PATH=/gazebo_ws/worlds:/usr/share/gazebo-11
 
     volumes:
-      - ./ros2_ws:/ros2_ws
+      - ./gazebo_ws:/gazebo_ws
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /mnt/wslg:/mnt/wslg
       - /usr/lib/wsl:/usr/lib/wsl
@@ -33,15 +34,28 @@ services:
     ipc: host
     stdin_open: true
     tty: true
-    command: gazebo
 
   betaflight_sitl:
     container_name: betaflight_sitl
     build:
       context: .
       dockerfile: docker/beta_sitl.Dockerfile
-
     network_mode: host
     stdin_open: true
     tty: true
-    command: ./obj/main/betaflight_SITL.elf
+    volumes:
+      - ./betaflight_ws:/betaflight_ws
+    # UART1 is at TCP port 5761. Map it to UDP 14550 if needed, or use TCP 5761.
+    command: /bin/bash -c "./obj/main/betaflight_SITL.elf < /betaflight/init.cli"
+
+  python_controller:
+    container_name: python_controller
+    build:
+      context: .
+      dockerfile: docker/python_controller.Dockerfile
+    network_mode: host
+    volumes:
+      - ./controller:/app
+    depends_on:
+      - betaflight_sitl
+    command: python3 controller.py

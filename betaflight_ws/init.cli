@@ -1,0 +1,25 @@
+# Reset configuration
+defaults
+
+# Set the SITL communication ports for Gazebo
+set sitl_host = 127.0.0.1
+set sitl_port = 9002
+set sitl_port_in = 9003
+
+# Enable MAVLink on UART1
+feature MAVLINK
+serial 0 1 115200 115200 0 0
+
+# Set motor mixer to Quad X
+mixer QUADX
+
+# Set PID loop frequency
+set pid_process_denom = 1
+set gyro_sync_denom = 1
+
+# Enable some features
+feature RX_SERIAL
+set serialrx_provider = MSP
+
+# Save and reboot
+save
