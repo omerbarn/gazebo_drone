@@ -16,7 +16,7 @@ services:
       - LD_LIBRARY_PATH=/usr/lib/wsl/lib
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
-      - GAZEBO_MODEL_PATH=/gazebo_ws/models:/plugins/ardupilot_gazebo/models
+      - GAZEBO_MODEL_PATH=/gazebo_ws/models:/plugins/gazebo-betaflight/models
       - GAZEBO_RESOURCE_PATH=/gazebo_ws/worlds:/usr/share/gazebo-11
 
     volumes:
