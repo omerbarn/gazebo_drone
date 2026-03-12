@@ -21,17 +21,16 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /plugins
 
-# Clone and build the Betaflight Gazebo plugin from mkschreder/gazebo-betaflight
-# This is one of the few specific to Gazebo Classic
-RUN git clone https://github.com/mkschreder/gazebo-betaflight.git /plugins/gazebo-betaflight
+# ArduPilot plugin (ArduCopterPlugin) - used by Betaflight SITL as well
+RUN git clone https://github.com/ArduPilot/ardupilot_gazebo.git /plugins/ardupilot_gazebo
 
-WORKDIR /plugins/gazebo-betaflight
-RUN mkdir build && cd build && cmake .. && make -j$(nproc)
+WORKDIR /plugins/ardupilot_gazebo
+RUN mkdir build && cd build && cmake .. && make -j$(nproc) && make install
 
 WORKDIR /gazebo_ws
 
 # Setup env variables for Gazebo to find models and world
-ENV GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:/plugins/gazebo-betaflight/build
-ENV GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:/plugins/gazebo-betaflight/models
+ENV GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:/usr/local/lib
+ENV GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:/plugins/ardupilot_gazebo/models
 
 CMD ["gazebo", "--verbose", "/gazebo_ws/worlds/drone_world.world"]

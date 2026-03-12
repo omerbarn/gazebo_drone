@@ -6,7 +6,7 @@
     <!-- Base Link -->
     <link name="base_link">
       <inertial>
-        <mass>0.8</mass> <!-- Approx weight for a 7-inch drone -->
+        <mass>0.8</mass>
         <inertia>
           <ixx>0.005</ixx>
           <iyy>0.005</iyy>
@@ -28,119 +28,141 @@
         </material>
       </visual>
 
-      <!-- IMU Sensor -->
       <sensor name="imu_sensor" type="imu">
         <always_on>1</always_on>
         <update_rate>250</update_rate>
       </sensor>
     </link>
 
-    <!-- Rotors (4 for Quadcopter) -->
-    <!-- Front Right -->
+    <!-- Rotors -->
     <link name="rotor_0">
       <pose>0.15 -0.15 0.03 0 0 0</pose>
       <inertial>
         <mass>0.01</mass>
-        <inertia>
-          <ixx>1e-06</ixx><iyy>1e-06</iyy><izz>1e-06</izz>
-        </inertia>
+        <inertia><ixx>1e-06</ixx><iyy>1e-06</iyy><izz>1e-06</izz></inertia>
       </inertial>
       <visual name="visual">
-        <geometry>
-          <cylinder><radius>0.09</radius><length>0.01</length></cylinder>
-        </geometry>
+        <geometry><cylinder><radius>0.09</radius><length>0.01</length></cylinder></geometry>
       </visual>
     </link>
     <joint name="rotor_0_joint" type="revolute">
       <parent>base_link</parent>
       <child>rotor_0</child>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+      <axis><xyz>0 0 1</xyz></axis>
     </joint>
 
-    <!-- Front Left -->
     <link name="rotor_1">
       <pose>0.15 0.15 0.03 0 0 0</pose>
       <inertial>
         <mass>0.01</mass>
-        <inertia>
-          <ixx>1e-06</ixx><iyy>1e-06</iyy><izz>1e-06</izz>
-        </inertia>
+        <inertia><ixx>1e-06</ixx><iyy>1e-06</iyy><izz>1e-06</izz></inertia>
       </inertial>
       <visual name="visual">
-        <geometry>
-          <cylinder><radius>0.09</radius><length>0.01</length></cylinder>
-        </geometry>
+        <geometry><cylinder><radius>0.09</radius><length>0.01</length></cylinder></geometry>
       </visual>
     </link>
     <joint name="rotor_1_joint" type="revolute">
       <parent>base_link</parent>
       <child>rotor_1</child>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+      <axis><xyz>0 0 1</xyz></axis>
     </joint>
 
-    <!-- Back Left -->
     <link name="rotor_2">
       <pose>-0.15 0.15 0.03 0 0 0</pose>
       <inertial>
         <mass>0.01</mass>
-        <inertia>
-          <ixx>1e-06</ixx><iyy>1e-06</iyy><izz>1e-06</izz>
-        </inertia>
+        <inertia><ixx>1e-06</ixx><iyy>1e-06</iyy><izz>1e-06</izz></inertia>
       </inertial>
       <visual name="visual">
-        <geometry>
-          <cylinder><radius>0.09</radius><length>0.01</length></cylinder>
-        </geometry>
+        <geometry><cylinder><radius>0.09</radius><length>0.01</length></cylinder></geometry>
       </visual>
     </link>
     <joint name="rotor_2_joint" type="revolute">
       <parent>base_link</parent>
       <child>rotor_2</child>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+      <axis><xyz>0 0 1</xyz></axis>
     </joint>
 
-    <!-- Back Right -->
     <link name="rotor_3">
       <pose>-0.15 -0.15 0.03 0 0 0</pose>
       <inertial>
         <mass>0.01</mass>
-        <inertia>
-          <ixx>1e-06</ixx><iyy>1e-06</iyy><izz>1e-06</izz>
-        </inertia>
+        <inertia><ixx>1e-06</ixx><iyy>1e-06</iyy><izz>1e-06</izz></inertia>
       </inertial>
       <visual name="visual">
-        <geometry>
-          <cylinder><radius>0.09</radius><length>0.01</length></cylinder>
-        </geometry>
+        <geometry><cylinder><radius>0.09</radius><length>0.01</length></cylinder></geometry>
       </visual>
     </link>
     <joint name="rotor_3_joint" type="revolute">
       <parent>base_link</parent>
       <child>rotor_3</child>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
+      <axis><xyz>0 0 1</xyz></axis>
     </joint>
 
-    <!-- Betaflight Plugin (mkschreder/gazebo-betaflight) -->
-    <plugin name="betaflight_interface" filename="libgazebo_betaflight_plugin.so">
-      <robotNamespace></robotNamespace>
-      <address>127.0.0.1</address>
-      <port>9002</port>
-      <commandPort>9003</commandPort>
-      <!-- Motor mapping for the plugin -->
-      <motor count="4">
-        <joint>rotor_0_joint</joint>
-        <joint>rotor_1_joint</joint>
-        <joint>rotor_2_joint</joint>
-        <joint>rotor_3_joint</joint>
-      </motor>
+    <plugin name="arducopter_plugin" filename="libArduPilotPlugin.so">
+      <fdm_addr>127.0.0.1</fdm_addr>
+      <fdm_port_in>9002</fdm_port_in>
+      <fdm_port_out>9003</fdm_port_out>
+      <modelXYZToRunwayXYZ>0 0 0 0 0 0</modelXYZToRunwayXYZ>
+      <gazeboXYZToNED>0 0 0 0 0 0</gazeboXYZToNED>
+      <imuName>base_link::imu_sensor</imuName>
+      <connectionTimeoutMaxCount>5</connectionTimeoutMaxCount>
+      <control channel="0">
+        <type>VELOCITY</type>
+        <offset>0</offset>
+        <p_gain>0.2</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>1000</cmd_max>
+        <cmd_min>-1000</cmd_min>
+        <jointName>rotor_0_joint</jointName>
+        <multiplier>100</multiplier>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+      <control channel="1">
+        <type>VELOCITY</type>
+        <offset>0</offset>
+        <p_gain>0.2</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>1000</cmd_max>
+        <cmd_min>-1000</cmd_min>
+        <jointName>rotor_1_joint</jointName>
+        <multiplier>100</multiplier>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+      <control channel="2">
+        <type>VELOCITY</type>
+        <offset>0</offset>
+        <p_gain>0.2</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>1000</cmd_max>
+        <cmd_min>-1000</cmd_min>
+        <jointName>rotor_2_joint</jointName>
+        <multiplier>100</multiplier>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
+      <control channel="3">
+        <type>VELOCITY</type>
+        <offset>0</offset>
+        <p_gain>0.2</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>1000</cmd_max>
+        <cmd_min>-1000</cmd_min>
+        <jointName>rotor_3_joint</jointName>
+        <multiplier>100</multiplier>
+        <controlVelocitySlowdownSim>1</controlVelocitySlowdownSim>
+      </control>
     </plugin>
   </model>
 </sdf>

@@ -1,13 +1,9 @@
 import time
-import math
 from pymavlink import mavutil
-
-# Betaflight RC Channel mapping (standard)
-# CH1: Roll, CH2: Pitch, CH3: Throttle, CH4: Yaw
-# AUX1: Arm (usually)
 
 def connect_to_drone():
     print("Waiting for Betaflight SITL...")
+    # UART1 on TCP 5761
     connection = mavutil.mavlink_connection('tcp:127.0.0.1:5761')
     while True:
         try:
@@ -19,11 +15,6 @@ def connect_to_drone():
     return connection
 
 def set_rc(master, roll=1500, pitch=1500, throttle=1000, yaw=1500, aux1=1000):
-    """
-    Send RC_CHANNELS_OVERRIDE
-    Values should be between 1000 and 2000
-    """
-    # CH1-CH8
     channels = [roll, pitch, throttle, yaw, aux1, 0, 0, 0]
     master.mav.rc_channels_override_send(
         master.target_system,
@@ -32,18 +23,15 @@ def set_rc(master, roll=1500, pitch=1500, throttle=1000, yaw=1500, aux1=1000):
     )
 
 def arm_drone(master):
-    print("Arming via AUX1...")
-    # Betaflight often uses a specific channel for arming
-    # Let's send AUX1 high (2000) to arm
+    print("Arming...")
     for _ in range(10):
         set_rc(master, aux1=2000)
         time.sleep(0.1)
-    print("Armed (AUX1 high)")
+    print("Armed")
 
 def takeoff(master):
-    print("Taking off (increasing throttle)...")
+    print("Taking off...")
     for i in range(100):
-        # Gradually increase throttle from 1000 to 1600
         throttle = 1000 + (i * 6)
         set_rc(master, throttle=throttle, aux1=2000)
         time.sleep(0.05)
@@ -53,13 +41,13 @@ def takeoff(master):
         time.sleep(0.05)
 
 def circular_flight(master, duration=60):
-    print("Executing circular trajectory via RC...")
+    print("Executing circular trajectory...")
     start_time = time.time()
     while time.time() - start_time < duration:
-        # Roll 1600 (right), Pitch 1550 (forward), Yaw 1550 (right turn)
+        # Small inputs for circular motion
         set_rc(master, roll=1600, pitch=1550, throttle=1550, yaw=1550, aux1=2000)
         time.sleep(0.05)
-    print("Circular flight done!")
+    print("Done")
 
 def land(master):
     print("Landing...")
@@ -67,9 +55,8 @@ def land(master):
         throttle = 1550 - (i * 5)
         set_rc(master, throttle=max(1000, throttle), aux1=2000)
         time.sleep(0.05)
-    # Disarm
     set_rc(master, aux1=1000)
-    print("Landed and Disarmed.")
+    print("Disarmed")
 
 if __name__ == "__main__":
     try:
@@ -79,8 +66,6 @@ if __name__ == "__main__":
         circular_flight(master, 60)
         land(master)
     except KeyboardInterrupt:
-        print("Interrupted by user.")
-        # Try to disarm
         if 'master' in locals():
             set_rc(master, aux1=1000)
     except Exception as e:

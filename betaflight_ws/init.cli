@@ -13,17 +13,14 @@ serial 0 1 115200 115200 0 0
 # Set motor mixer to Quad X
 mixer QUADX
 
-# Set PID loop frequency
+# PID and ESC settings for SITL stability (per documentation)
 set pid_process_denom = 1
 set gyro_sync_denom = 1
-
-# Enable some features
-feature RX_SERIAL
-set serialrx_provider = MSP
+# ESC/Motor: PWM, disable Motor PWM speed Separated from PID speed
+# This is usually done in the configuration tab or via CLI
+# set motor_pwm_protocol = PWM (default)
 
 # Configure Arming switch on AUX1 (Channel 5)
-# mode_id 0 is ARM
-# aux channel 0 is AUX1
 aux 0 0 0 1700 2100
 
 # Save and reboot
