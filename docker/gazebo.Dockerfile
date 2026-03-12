@@ -13,10 +13,8 @@ RUN apt-get update && apt-get install -y \
     mesa-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Gazebo 11 from official OSRF repository
-RUN sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' \
-    && curl -sSL http://packages.osrfoundation.org/gazebo.key | apt-key add - \
-    && apt-get update && apt-get install -y \
+# Install Gazebo 11 from Ubuntu repositories (it is available in 22.04 by default)
+RUN apt-get update && apt-get install -y \
     gazebo11 \
     libgazebo11-dev \
     && rm -rf /var/lib/apt/lists/*

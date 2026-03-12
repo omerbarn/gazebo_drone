@@ -45,7 +45,6 @@ services:
     tty: true
     volumes:
       - ./betaflight_ws:/betaflight_ws
-    # UART1 is at TCP port 5761. Map it to UDP 14550 if needed, or use TCP 5761.
     command: /bin/bash -c "./obj/main/betaflight_SITL.elf < /betaflight/init.cli"
 
   python_controller:
