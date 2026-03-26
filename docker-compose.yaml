@@ -2,46 +2,62 @@ version: "3.9"
 
 services:
 
-  ros2_gazebo:
-    container_name: ros2_gazebo
+  gazebo:
+    container_name: gazebo
     build:
       context: .
-      dockerfile: docker/gazebo_ros.Dockerfile
-
+      dockerfile: docker/gazebo_sim.Dockerfile
     environment:
-      - DISPLAY=:0
-      - WAYLAND_DISPLAY=wayland-0
-      - XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir
-      - PULSE_SERVER=/mnt/wslg/PulseServer
+      - DISPLAY=${DISPLAY}
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+      - PULSE_SERVER=${PULSE_SERVER}
       - LD_LIBRARY_PATH=/usr/lib/wsl/lib
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
-      - MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA
-
     volumes:
-      - ./ros2_ws:/ros2_ws
+      - ./gazebo_ws:/gazebo_ws
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /mnt/wslg:/mnt/wslg
       - /usr/lib/wsl:/usr/lib/wsl
-
     devices:
       - /dev/dxg
-
     runtime: nvidia
     privileged: true
     network_mode: host
     ipc: host
     stdin_open: true
     tty: true
-    command: gazebo
 
-  betaflight_sitl:
-    container_name: betaflight_sitl
+  ardupilot_sitl:
+    container_name: ardupilot_sitl
     build:
       context: .
-      dockerfile: docker/beta_sitl.Dockerfile
-
+      dockerfile: docker/ardupilot_sitl.Dockerfile
     network_mode: host
     stdin_open: true
     tty: true
-    command: ./obj/main/betaflight_SITL.elf
+    # SITL connects to Gazebo on 127.0.0.1:9002 (default for gazebo-iris model)
+    # It provides MAVLink on 127.0.0.1:14550
+
+  mavros:
+    container_name: mavros
+    build:
+      context: .
+      dockerfile: docker/mavros.Dockerfile
+    network_mode: host
+    depends_on:
+      - ardupilot_sitl
+    # MAVROS connects to SITL on 127.0.0.1:14550
+
+  pymavlink_controller:
+    container_name: pymavlink_controller
+    build:
+      context: .
+      dockerfile: docker/pymavlink_controller.Dockerfile
+    network_mode: host
+    volumes:
+      - ./controller:/app
+    depends_on:
+      - ardupilot_sitl
+    command: python3 controller.py
